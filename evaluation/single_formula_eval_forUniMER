@@ -1,0 +1,66 @@
+from ExpRate_metrics import compute_exprate,compute_exprate_1
+
+import os
+from statistics import mean
+
+#OUTPUT_DIR = '/home/ysh/InternVL/InternVL_2B/Eval/eval/formula_internvl_output'
+#GT_dir = '/home/ysh/InternVL/InternVL_2B/Eval/eval/formula_txts_withoutblank'
+OUTPUT_DIR = '/data1/doc_data/ysh/Unimer/UniMER-Test/spe_1014'
+#GT_dir = '/home/ysh/InternVL/InternVL_2B/Eval/eval/im2k/formula_txts'
+GT_FILE = '/home/ysh/InternVL/InternVL_2B/Eval/eval/UniMER1M/UniMER-Test/spe.txt'
+preds = os.listdir(OUTPUT_DIR)
+
+exprates,error_1s,error_2s = [],[],[]
+'''
+for pred in preds:
+    with open(f'{OUTPUT_DIR}/{pred}',encoding='utf-8') as f:
+        result = f.read()
+
+    result = result.replace(' ', '')     #输入带空格
+    result = result
+    with open(f'{GT_dir}/{pred}',encoding='utf-8') as f:
+        gt = f.read().replace(' ', '')     #输入带空格
+        #gt = f.read()
+    exprate,error_1,error_2 = compute_exprate([result],[gt])
+    
+    exprates.append(exprate)
+    error_1s.append(error_1)
+    error_2s.append(error_2)
+print(mean(exprates))
+print(mean(error_1s))
+print(mean(error_2s))
+'''
+# Load GT data from the single file
+def load_gt_data(gt_file):
+    with open(gt_file, 'r', encoding='utf-8') as f:
+        gt_data = f.read().strip().split('\n')
+    return gt_data
+    
+# Load all GT data
+gt_data = load_gt_data(GT_FILE)
+
+# Evaluation
+for pred_file in sorted(os.listdir(OUTPUT_DIR)):
+    if pred_file.endswith('.txt'):
+        pred_path = os.path.join(OUTPUT_DIR, pred_file)
+
+        # Get the index from the filename
+        index = int(os.path.splitext(pred_file)[0])
+
+        # Get the corresponding GT equation
+        true = gt_data[index].replace(' ', '')
+        #true = gt_data[index]
+
+        with open(pred_path, 'r', encoding='utf-8') as f:
+            pred = f.read().replace(' ', '')
+            #pred = f.read()
+        # Evaluate using ExpRate
+        #scores_dict = compute_exprate([pred], [true])    # 输入不带空格
+        exprate,error_1,error_2 = compute_exprate([pred],[true])
+        
+        exprates.append(exprate)
+        error_1s.append(error_1)
+        error_2s.append(error_2)
+print(mean(exprates))
+print(mean(error_1s))
+print(mean(error_2s))      
